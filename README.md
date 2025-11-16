@@ -1,102 +1,119 @@
-# Tour de App - NextJS + Flask Boilerplate
+# Tour de App - NextJS + Flask boiler plate
 
-> **Note:** Czech version is available below / Česká verze je k dispozici níže
-
-A template for developing applications for the Tour de App competition with a frontend in [NextJS](https://nextjs.org/) and a backend in [Flask](https://flask.palletsprojects.com/).
-
-## Initial Setup
-
-In the frontend and backend directories, there are `.env.example` files that need to be renamed to `.env` and the values adjusted as needed.
-
-For production development, you need to set `NEXT_PUBLIC_API_URL` to the API server URL in both places in the `tourdeapp.yaml` file to the URL you find on the main page of your project on [tourde.cloud](https://tourde.cloud/).
-
-> [!WARNING]
-> If you want to change the database password, you need to change it in the `tourdeapp.yaml` file, `apps/server/.env`, and for local development in the `apps/server/package.json` file.
-
-## Local Development
-
-For local development, you need to run:
-- **frontend** (`apps/web`), using `npm run dev` (in the correct directory - `apps/web`), it will start at [http://localhost:3001](http://localhost:3001)
-- **backend** (`apps/server`), using `uv run python main.py` (in the correct directory - `apps/server`), it will start at [http://localhost:3000](http://localhost:3000)
-- **MySQL** database, using `./db.sh` (Linux/MacOS) or `.\db.ps1` (Windows) in the `apps/server` directory, the database will run on port 3306
-
-> [!WARNING]
-> The database is not persistent, data will be lost after shutting down the Docker container.
-
-## Production Setup (how does it run on our servers?)
-
-How the application runs on [tourde.cloud](https://tourde.cloud/) is defined in the `tourdeapp.yaml` file in the root directory of this repository. This boilerplate includes pre-configured services:
-```
-- caddy (reverse proxy for frontend and backend) - handles routing requests to your application to the correct place (i.e., /* to frontend and /api/* to backend)
-- web (frontend application)
-- server (backend application)
-- mysql (MySQL database)
-```
-
-> [!WARNING]
-> The database is not persistent, data will be lost after uploading a new version of the application.
-
-> [!NOTE]
-> The reverse proxy is set by default so that requests to `/*` go to the frontend and `/api/*` to the backend. If you want to have the API on different addresses, you need to change the `Caddyfile` file in the `apps/caddy` directory.
-
-What `tourdeapp.yaml` can contain is described in [How to deploy an app to Tour de Cloud](https://tourdeapp.com/study-materials/how-to-deploy).
-
-Applications are uploaded to Tour de Cloud via [GitHub action](https://github.com/Student-Cyber-Games/upload-app?tab=readme-ov-file). For uploading, you need to set **TDC_TOKEN**:
-- Settings -> (Security) Secrets and variables -> Actions -> New repository secret.
-- Name: `TDC_TOKEN` Secret: [your secret generated in [tourde.cloud](https://tourde.cloud/)]
-
-
-### Prerequisites
-
-#### Windows
-
-- Installed [WSL2 (Windows Subsystem for Linux)](https://learn.microsoft.com/en-us/windows/wsl/install)
-- Installed and running [Docker](https://www.docker.com/)
-- Installed [Node.js](https://nodejs.org/en/download/)
-- Installed [npm](https://www.npmjs.com/get-npm) (usually included with Node.js)
-
-#### Linux / MacOS
-
-- Installed and running [Docker](https://www.docker.com/)
-- Installed [Node.js](https://nodejs.org/en/download/)
-- Installed [npm](https://www.npmjs.com/get-npm) (usually included with Node.js)
-
-## Submission
-
-How to submit your application can be found in our [How to deploy an app to Tour de Cloud](https://tourdeapp.com/study-materials/how-to-deploy)
-
----
-
-# Tour de App - NextJS + Flask Boilerplate
-
-**Česká verze / Czech Version**
-
-Šablona pro vývoj aplikace v soutěži Tour de App společně s frontendovou částí ve frameworku [NextJS](https://nextjs.org/) a backendovou částí v [Flask](https://flask.palletsprojects.com/).
+Šablona pro vývoj aplikace v soutěži Tour de App společně s frontendovou částí ve frameworku [NextJS](https://nextjs.org/), a backendovou částí v [Flask](https://flask.palletsprojects.com/).
 
 ## Prvotní nastavení
 
 V složkách pro frontend a backend jsou `.env.example` soubory, které je potřeba přejmenovat na `.env` a upravit hodnoty dle potřeby.
 
-Pro produkční vývoj je potřeba nastavit `NEXT_PUBLIC_API_URL` na URL API serveru na obou místech v souboru `tourdeapp.yaml` na URL, kterou najdete na hlavní stránce Vašeho projektu na [tourde.cloud](https://tourde.cloud/).
+Pro produkční vývoj je potřeba nastavit `NEXT_PUBLIC_API_URL` na URL API serveru na obou místech v souboru `tourdeapp.yaml` na URL kterou najdete na hlavní stránce Vašeho projektu na [tourde.cloud](https://tourde.cloud/).
 
 > [!WARNING]
 > Pokud chcete měnit heslo od databáze, je potřeba ho změnit v souboru `tourdeapp.yaml`, `apps/server/.env` a pro lokální vývoj v souboru `apps/server/package.json`.
 
 ## Lokální vývoj
 
-Pro lokální vývoj je potřeba pustit:
-- **frontend** (`apps/web`), pomocí `npm run dev` (ve správném adresáři - `apps/web`), pustí se na [http://localhost:3001](http://localhost:3001)
-- **backend** (`apps/server`), pomocí `uv run python main.py` (ve správném adresáři - `apps/server`), pustí se na [http://localhost:3000](http://localhost:3000)
-- **MySQL** databázi, pomocí `./db.sh` (Linux/MacOS) nebo `.\db.ps1` (Windows) v adresáři `apps/server`, databáze poběží na portu 3306
+Pro lokální vývoj je potřeba spustit tři služby: databázi, backend a frontend. Níže najdete podrobné instrukce krok za krokem.
+
+### Krok 1: Nastavení environmentálních proměnných
+
+Nejprve je potřeba nastavit environmentální proměnné:
+
+1. **Backend**: V adresáři `apps/server` přejmenujte soubor `.env.example` na `.env`:
+   ```bash
+   cd apps/server
+   cp .env.example .env
+   ```
+
+2. **Frontend**: V adresáři `apps/web` přejmenujte soubor `.env.example` na `.env`:
+   ```bash
+   cd ../web
+   cp .env.example .env
+   ```
+
+### Krok 2: Instalace závislostí
+
+Nainstalujte závislosti pro obě části aplikace:
+
+1. **Backend závislosti** (používá `uv` pro správu Python balíčků):
+   ```bash
+   cd apps/server
+   uv sync
+   ```
+   Tento příkaz nainstaluje všechny Python závislosti definované v `pyproject.toml`.
+
+2. **Frontend závislosti**:
+   ```bash
+   cd ../web
+   npm install
+   ```
+
+### Krok 3: Spuštění MySQL databáze
+
+Databázi spustíte pomocí Docker kontejneru:
+
+**Linux/MacOS:**
+```bash
+cd apps/server
+chmod +x db.sh
+./db.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+cd apps/server
+.\db.ps1
+```
+
+Databáze poběží na portu **3306**. Počkejte několik sekund, než se databáze plně inicializuje (obvykle 10-20 sekund).
 
 > [!WARNING]
 > Databáze není perzistentní, data se z ní po vypnutí Docker kontejneru ztratí.
 
+> [!TIP]
+> Pokud potřebujete databázi zastavit, použijte příkaz `docker ps` pro zobrazení běžících kontejnerů a `docker stop <container-id>` pro zastavení kontejneru s databází.
+
+### Krok 4: Spuštění backend serveru
+
+V novém terminálu spusťte backend:
+
+```bash
+cd apps/server
+uv run python main.py
+```
+
+Backend poběží na [http://localhost:3000](http://localhost:3000). Měli byste vidět zprávu, že server běží a je připojen k databázi.
+
+### Krok 5: Spuštění frontend aplikace
+
+V dalším terminálu spusťte frontend:
+
+```bash
+cd apps/web
+npm run dev
+```
+
+Frontend poběží na [http://localhost:3001](http://localhost:3001). Otevřete tuto adresu v prohlížeči.
+
+### Ověření, že vše funguje
+
+1. **Frontend**: Otevřete [http://localhost:3001](http://localhost:3001) - měla by se zobrazit vaše aplikace
+2. **Backend API**: Otevřete [http://localhost:3000/api](http://localhost:3000/api) - měli byste vidět odpověď z API
+3. **Databáze**: Můžete se připojit pomocí MySQL klienta na `localhost:3306` s uživatelským jménem `root` a heslem `password`
+
+### Řešení problémů
+
+- **Port již používán**: Pokud některý z portů (3000, 3001, 3306) je již používán, ukončete proces, který ho používá, nebo změňte port v konfiguračních souborech
+- **Databáze se nespustí**: Zkontrolujte, zda máte nainstalovaný a spuštěný Docker
+- **Backend se nemůže připojit k databázi**: Počkejte, až se databáze plně inicializuje (obvykle trvá 10-20 sekund po spuštění)
+- **Node.js není nainstalován**: Nainstalujte Node.js z [nodejs.org](https://nodejs.org/) nebo použijte správce verzí jako `nvm` (Linux/MacOS: `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash`, Windows: stáhněte z [nvm-windows](https://github.com/coreybutler/nvm-windows))
+- **`uv` není nainstalován**: Nainstalujte `uv` pomocí `curl -LsSf https://astral.sh/uv/install.sh | sh` (Linux/MacOS) nebo `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"` (Windows)
+
 ## Produkční setup (jak se to spouští na našich serverech?)
 
-Jak se aplikace spustí na [tourde.cloud](https://tourde.cloud/) je definováno v souboru `tourdeapp.yaml` v kořenovém adresáři tohoto repozitáře. V tomto boilerplate jsou předpřipravené služby:
+Jak se aplikace spustí na [tourde.cloud](https://tourde.cloud/) je definováno v souboru `tourdeapp.yaml` v kořenovém adresáři tohoto repozitáře. V tomto boiler plate jsou předpřipravené služby:
 ```
-- caddy (reverse proxy pro frontend a backend) - stará se o to, aby dotazy na Vaší aplikaci byly směrovány na správné místo (tj. /* na frontend a /api/* na backend)
+- caddy (reverse proxy pro frontend a backend) - stará se o to aby dotazy na Vaší aplikaci byly směrovány na správné místo (tj. /* na frontend a /api/* na backend)
 - web (frontend aplikace)
 - server (backend aplikace)
 - mysql (MySQL databáze)
@@ -106,11 +123,11 @@ Jak se aplikace spustí na [tourde.cloud](https://tourde.cloud/) je definováno 
 > Databáze není perzistentní, data se z ní po nahrání nové verze aplikace ztratí.
 
 > [!NOTE]
-> Reverse proxy je defaultně nastaven tak, že dotazy na `/*` jdou na frontend a `/api/*` na backend. Pokud byste chtěli API mít na jiných adresách, je nutné změnit soubor `Caddyfile` v adresáři `apps/caddy`.
+> Reverse proxy je defaultně nastaven tak, že dotazy na `/*` jdou na frontend a `/api/*` pokud by jste chtěli api mít na jiné adresy je nutné změnit soubor `Caddyfile` v adresáři `apps/caddy`.
 
-Co může `tourdeapp.yaml` obsahovat je napsáno v [Jak nasadit aplikaci na Tour de Cloud](https://tourdeapp.cz/vzdelavaci-materialy/jak-deploy).
+Co může `tourdeapp.yaml` obsahovat je napsáno v [kde??]().
 
-Do Tour de Cloud se aplikace nahrávají přes [GitHub action](https://github.com/Student-Cyber-Games/upload-app?tab=readme-ov-file). Pro nahrání je potřeba zadat **TDC_TOKEN**:
+Do Tour de Cloud se aplikace nahrávají přes [GitHub action](https://github.com/Student-Cyber-Games/upload-app?tab=readme-ov-file), pro nahrání je potřeba zadat **TDC_TOKEN**:
 - Settings -> (Security) Secrets and variables -> Actions -> New repository secret.
 - Name: `TDC_TOKEN` Secret: [váš secret vygenerovaný v [tourde.cloud](https://tourde.cloud/)]
 
@@ -132,4 +149,4 @@ Do Tour de Cloud se aplikace nahrávají přes [GitHub action](https://github.co
 
 ## Odevzdání
 
-Jak odevzdat svoji aplikaci můžete najít v našich [Jak nasadit aplikaci na Tour de Cloud](https://tourdeapp.cz/vzdelavaci-materialy/jak-deploy)
+Jak odevzdat svojí aplikaci můžete najít v našich [kde??]()
