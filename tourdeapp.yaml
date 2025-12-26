@@ -28,7 +28,7 @@ build:
     context: ./apps/web
     dockerfile: ./apps/web/Dockerfile
     args:
-      NEXT_PUBLIC_API_URL: https://<slug>.tourde.app
+      NEXT_PUBLIC_API_URL: https://<team_url>.tourde.app
   - name: server
     context: ./apps/server
     dockerfile: ./apps/server/Dockerfile
